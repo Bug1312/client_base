@@ -1,0 +1,33 @@
+{
+	"schemaVersion": 1,
+	"id": "client_base",
+	"version": "${version}",
+	"name": "Client Base",
+	"description": "Provides the player with a client-only room that dependencies can hook into for special functionality.",
+	"authors": [
+		"Bug1312"
+	],
+	"contact": {
+		"issues": "https://github.com/Bug1312/client_base/issues",
+		"sources": "https://github.com/Bug1312/client_base/"
+	},
+	"license": "LGPL-3.0-only",
+	"icon": "assets/client_base/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"com.bug1312.client_base.core.ClientBaseModCoreInitializer",
+			"com.bug1312.client_base.base.ClientBaseModBaseInitializer"
+		]
+	},
+	"mixins": [
+		"client_base.core.mixins.json",
+		"client_base.base.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.18.4",
+		"minecraft": "~1.20.1",
+		"java": ">=17",
+		"fabric-api": "*"
+	}
+}
