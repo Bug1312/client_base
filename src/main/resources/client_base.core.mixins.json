@@ -1,0 +1,17 @@
+{
+	"required": true,
+	"package": "com.bug1312.client_base.core.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+		"ClientCommonNetworkHandlerMixin",
+		"ClientPlayerInteractionManagerMixin",
+		"EntityRenderDispatcherMixin",
+		"MinecraftClientMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}
