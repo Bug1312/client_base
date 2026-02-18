@@ -19,6 +19,7 @@ import net.minecraft.client.render.block.BlockModels;
 import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedModelManager;
+import net.minecraft.util.Identifier;
 
 @Environment(EnvType.CLIENT)
 @Mixin(BlockRenderManager.class)
@@ -35,6 +36,8 @@ abstract class BlockRenderManagerMixin {
 			if (!(entry.getValue() instanceof BlockModelRenderer blockModelRenderer)) continue;
 			if (!blockModelRenderer.matcher().matches(state)) continue;
 			BakedModelManager bakedModelManager = MinecraftClient.getInstance().getBakedModelManager();
+			Identifier model = blockModelRenderer.model();
+			if (model == null) return;
 
 			ci.setReturnValue(bakedModelManager.getModel(blockModelRenderer.model()));
 
