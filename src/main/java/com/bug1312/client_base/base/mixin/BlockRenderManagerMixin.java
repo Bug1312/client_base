@@ -31,13 +31,14 @@ abstract class BlockRenderManagerMixin {
 
 	@Inject(method = "getModel", at = @At("HEAD"), cancellable = true)
 	private void client_base$blockModelRendererReplace(BlockState state, CallbackInfoReturnable<BlockStateModel> ci) {
-		if (ClientBaseApi.isBaseActive()) return;
+		if (!ClientBaseApi.isBaseActive()) return;
 
 		for (var entry : ClientBaseConfig.getInstance().renderers().entrySet()) {
 			if (!(entry.getValue() instanceof BlockModelRenderer blockModelRenderer)) continue;
 			if (!blockModelRenderer.matcher().matches(state)) continue;
 			BakedModelManager bakedModelManager = MinecraftClient.getInstance().getBakedModelManager();
 			ExtraModelKey<BlockStateModel> key = ClientBaseModelLoadingPlugin.MODEL_KEY_MAP.get(blockModelRenderer.model());
+			if (key == null) continue;
 
 			ci.setReturnValue(bakedModelManager.getModel(key));
 			return;
