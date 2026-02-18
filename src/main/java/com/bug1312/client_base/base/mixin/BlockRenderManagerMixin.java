@@ -19,6 +19,7 @@ import net.minecraft.client.render.block.BlockModels;
 import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedModelManager;
+import net.minecraft.util.Identifier;
 
 @Environment(EnvType.CLIENT)
 @Mixin(BlockRenderManager.class)
@@ -29,12 +30,14 @@ abstract class BlockRenderManagerMixin {
 
 	@Inject(method = "getModel", at = @At("HEAD"), cancellable = true)
 	private void client_base$blockModelRendererReplace(BlockState state, CallbackInfoReturnable<BakedModel> ci) {
-		if (ClientBaseApi.isBaseActive()) return;
+		if (!ClientBaseApi.isBaseActive()) return;
 
 		for (var entry : ClientBaseConfig.getInstance().renderers().entrySet()) {
 			if (!(entry.getValue() instanceof BlockModelRenderer blockModelRenderer)) continue;
 			if (!blockModelRenderer.matcher().matches(state)) continue;
 			BakedModelManager bakedModelManager = MinecraftClient.getInstance().getBakedModelManager();
+			Identifier model = blockModelRenderer.model();
+			if (model == null) return;
 
 			ci.setReturnValue(bakedModelManager.getModel(blockModelRenderer.model()));
 
