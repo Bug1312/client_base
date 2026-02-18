@@ -20,6 +20,7 @@ import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -36,7 +37,10 @@ abstract class ChestBlockMixin {
 			|| !(world.getBlockEntity(pos) instanceof ChestBlockEntity blockEntity)
 		) return;
 
-		NbtCompound nbt = blockEntity.getStack(0).getComponents().getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(new NbtCompound())).copyNbt();
+		ItemStack stack = blockEntity.getStack(0);
+		if (stack == null) return;
+		NbtCompound nbt = stack.getComponents().getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(new NbtCompound())).copyNbt();
+		if (nbt == null) return;
 
 		Optional<String> fakeBlockIdOpt = Optional.of(nbt.getString(FakeBlockRenderer.COMPOUND_ID.toString()));
 		Optional<String> blockEntityRendererIdOpt = Optional.of(nbt.getString(BlockEntityRenderer.COMPOUND_ID.toString()));
