@@ -10,10 +10,10 @@ import com.bug1312.client_base.core.config.StructureConfig;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 public class SetupUtil {
@@ -24,39 +24,39 @@ public class SetupUtil {
 	@Nullable
 	public static BlockPos getStartPos() { return startPos; }
 
-	public static void construct(MinecraftClient client) {
+	public static void construct(Minecraft client) {
 		DesyncUtil.desync(client);
 
 		ClientBaseConfig.reload();
 
-		ClientPlayerEntity player = client.player;
-		startPos = player.getBlockPos();
+		LocalPlayer player = client.player;
+		startPos = player.blockPosition();
 
 		StructureConfig structureConfig = ClientBaseConfig.getInstance().structureConfig();
 		Optional<PlayerStartConfig> playerStartConfigOpt = ClientBaseConfig.getInstance().playerStartConfig();
 
-		ClientStructureUtil.place(structureConfig.structure(), startPos.add(structureConfig.offset()), client.world);
+		ClientStructureUtil.place(structureConfig.structure(), startPos.offset(structureConfig.offset()), client.level);
 
-		Vec3d newPos = new Vec3d(startPos);
+		Vec3 newPos = new Vec3(startPos);
 		if (playerStartConfigOpt.isPresent()) {
 			PlayerStartConfig config = playerStartConfigOpt.get();
 
 			newPos = newPos.add(config.offset());
-			player.setPos(newPos.x, newPos.y, newPos.z);
+			player.setPosRaw(newPos.x, newPos.y, newPos.z);
 
-			if (config.pitch().isPresent()) player.setPitch(config.pitch().get());
-			if (config.yaw().isPresent()) player.setYaw(config.yaw().get());
+			if (config.pitch().isPresent()) player.setXRot(config.pitch().get());
+			if (config.yaw().isPresent()) player.setYRot(config.yaw().get());
 		} else {
 			newPos = newPos.add(PlayerStartConfig.Deserializer.DEFAULT_OFFSET);
 		}
 
-		player.setPos(newPos.x, newPos.y, newPos.z);
-		player.setVelocity(Vec3d.ZERO);
-		player.getAbilities().allowModifyWorld = false;
+		player.setPosRaw(newPos.x, newPos.y, newPos.z);
+		player.setDeltaMovement(Vec3.ZERO);
+		player.getAbilities().mayBuild = false;
 
 	}
 
-	public static void deconstruct(MinecraftClient client) {
+	public static void deconstruct(Minecraft client) {
 		ClientStructureUtil.revert(client);
 
 		startPos = null;

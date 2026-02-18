@@ -6,9 +6,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.BlockHitResult;
 
 @Environment(EnvType.CLIENT)
 public class ClientBaseEvents {
@@ -24,6 +24,6 @@ public class ClientBaseEvents {
 
 	@FunctionalInterface
 	public interface Interact {
-		void onInteraction(InteractionType interaction, ClientPlayerEntity player, Hand hand, BlockHitResult hitResult);
+		void onInteraction(InteractionType interaction, LocalPlayer player, InteractionHand hand, BlockHitResult hitResult);
 	}
 }

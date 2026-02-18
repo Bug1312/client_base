@@ -27,8 +27,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 
 public record ClientBaseConfig(
 	StructureConfig structureConfig,
@@ -38,7 +38,7 @@ public record ClientBaseConfig(
 	List<EasyPlaceConfig> easyPlaceList
 ) implements Serializable {
 	static final Path CONFIG_PATH = Path.of("config/client_base.json");
-	static final ClientBaseConfig DEFAULT = new ClientBaseConfig(new StructureConfig(StructureConfig.Deserializer.DEFAULT_STRUCTURE, BlockPos.ORIGIN), Optional.empty(), new HashMap<>(), Collections.emptyList(), Collections.emptyList());
+	static final ClientBaseConfig DEFAULT = new ClientBaseConfig(new StructureConfig(StructureConfig.Deserializer.DEFAULT_STRUCTURE, BlockPos.ZERO), Optional.empty(), new HashMap<>(), Collections.emptyList(), Collections.emptyList());
 
 	@Nullable
 	static ClientBaseConfig instance;
@@ -86,8 +86,8 @@ public record ClientBaseConfig(
 				for (var entry : renderersObj.entrySet()) {
 					JsonObject rendererObj = entry.getValue().getAsJsonObject();
 					String typeString = rendererObj.get("type").getAsString();
-					if (!(Identifier.tryParse(typeString) instanceof Identifier typeId)) break;
-					ClientBaseRegistries.RENDERER_TYPE.getOptionalValue(typeId).ifPresent(registryEntry -> {
+					if (!(ResourceLocation.tryParse(typeString) instanceof ResourceLocation typeId)) break;
+					ClientBaseRegistries.RENDERER_TYPE.getOptional(typeId).ifPresent(registryEntry -> {
 						Gson gson = new GsonBuilder().registerTypeAdapter(RendererType.class, registryEntry).create();
 						renderers.put(entry.getKey(), gson.fromJson(rendererObj, RendererType.class));
 					});
@@ -101,8 +101,8 @@ public record ClientBaseConfig(
 				for (var entry : array.asList()) {
 					JsonObject arrayObj = entry.getAsJsonObject();
 					String typeString = arrayObj.get("type").getAsString();
-					if (!(Identifier.tryParse(typeString) instanceof Identifier typeId)) break;
-					ClientBaseRegistries.INTERACTION_TYPE.getOptionalValue(typeId).ifPresent(registryEntry -> {
+					if (!(ResourceLocation.tryParse(typeString) instanceof ResourceLocation typeId)) break;
+					ClientBaseRegistries.INTERACTION_TYPE.getOptional(typeId).ifPresent(registryEntry -> {
 						Gson gson = new GsonBuilder().registerTypeAdapter(InteractionType.class, registryEntry).create();
 						interactions.add(gson.fromJson(arrayObj, InteractionType.class));
 					});

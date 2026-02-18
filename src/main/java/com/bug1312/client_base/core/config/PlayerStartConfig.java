@@ -13,22 +13,22 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.phys.Vec3;
 
 public record PlayerStartConfig(
-	Vec3d offset,
+	Vec3 offset,
 	Optional<Float> pitch,
 	Optional<Float> yaw
 ) implements Serializable {
 	public static final Gson GSON = new GsonBuilder().registerTypeAdapter(PlayerStartConfig.class, new Deserializer()).create();
 	public static class Deserializer implements JsonDeserializer<PlayerStartConfig> {
-		public static final Vec3d DEFAULT_OFFSET = new Vec3d(0.5, 0.0, 0.5);
+		public static final Vec3 DEFAULT_OFFSET = new Vec3(0.5, 0.0, 0.5);
 
 		@Override
 		public PlayerStartConfig deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
 			JsonObject obj = json.getAsJsonObject();
 
-			Vec3d offset = obj.has("offset") ? DeserializeUtil.toVec3d(obj.get("offset")) : DEFAULT_OFFSET;
+			Vec3 offset = obj.has("offset") ? DeserializeUtil.toVec3d(obj.get("offset")) : DEFAULT_OFFSET;
 			Optional<Float> pitch = (obj.has("pitch")) ? Optional.of(obj.get("pitch").getAsFloat()) : Optional.empty();
 			Optional<Float> yaw = (obj.has("yaw")) ? Optional.of(obj.get("yaw").getAsFloat()) : Optional.empty();
 

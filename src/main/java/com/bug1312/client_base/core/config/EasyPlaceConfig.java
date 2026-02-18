@@ -16,8 +16,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.BlockPos;
 
 /**
  * Configuration that allows for Client Base's config to place blocks.
@@ -28,7 +28,7 @@ public record EasyPlaceConfig(
 	EasyPlaceable placeable
 ) implements Serializable {
 
-	public void place(ClientWorld world, BlockPos pos) {
+	public void place(ClientLevel world, BlockPos pos) {
 		placeable.place(world, pos);
 	}
 

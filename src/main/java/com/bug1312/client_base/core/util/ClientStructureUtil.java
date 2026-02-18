@@ -8,19 +8,19 @@ import com.bug1312.client_base.core.config.ClientBaseConfig;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.registry.Registries;
-import net.minecraft.state.property.Property;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 
 @Environment(EnvType.CLIENT)
 public class ClientStructureUtil {
@@ -28,42 +28,42 @@ public class ClientStructureUtil {
 	private static final Map<BlockPos, BlockState> ORIGINAL_BLOCKS = new HashMap<>();
 	private static final Map<BlockPos, BlockEntity> NEW_BLOCK_ENTITIES = new HashMap<>();
 
-	public static void place(NbtCompound nbt, BlockPos pos, ClientWorld world) {
-		NbtList sizeList = nbt.getList("size").get();
+	public static void place(CompoundTag nbt, BlockPos pos, ClientLevel world) {
+		ListTag sizeList = nbt.getList("size").get();
 		if (sizeList.size() != 3) return;
 
-		NbtList paletteList = nbt.getList("palette").get();
+		ListTag paletteList = nbt.getList("palette").get();
 		BlockState[] palette = new BlockState[paletteList.size()];
 
 		for (int i = 0; i < paletteList.size(); i++) {
-			NbtCompound stateNbt = paletteList.getCompound(i).get();
+			CompoundTag stateNbt = paletteList.getCompound(i).get();
 			palette[i] = readBlockState(stateNbt);
 		}
 
-		NbtList blocksList = nbt.getList("blocks").get();
+		ListTag blocksList = nbt.getList("blocks").get();
 		for (int i = 0; i < blocksList.size(); i++) {
-			NbtCompound blockNbt = blocksList.getCompound(i).get();
+			CompoundTag blockNbt = blocksList.getCompound(i).get();
 
-			BlockPos blockPos = blockNbt.get("pos", BlockPos.CODEC).get();
+			BlockPos blockPos = blockNbt.read("pos", BlockPos.CODEC).get();
 
 			int state = blockNbt.getInt("state").get();
 			if (state < 0 || state >= palette.length) continue;
 
 			BlockState blockState = palette[state];
-			BlockPos targetPos = pos.add(blockPos);
+			BlockPos targetPos = pos.offset(blockPos);
 
 			setBlockState(world, targetPos, blockState);
 
 			if (blockNbt.contains("nbt")) {
-				NbtCompound blockEntityNbt = blockNbt.getCompound("nbt").get();
+				CompoundTag blockEntityNbt = blockNbt.getCompound("nbt").get();
 				addBlockEntity(world, targetPos, blockState, blockEntityNbt);
 			}
 		}
 
 		for (var record : ClientBaseConfig.getInstance().easyPlaceList()) {
-			BlockPos newPos = pos.add(record.blockPos());
+			BlockPos newPos = pos.offset(record.blockPos());
 
-			ORIGINAL_BLOCKS.put(pos.toImmutable(), world.getBlockState(newPos));
+			ORIGINAL_BLOCKS.put(pos.immutable(), world.getBlockState(newPos));
 
 			record.placeable().place(world, newPos);
 
@@ -71,32 +71,32 @@ public class ClientStructureUtil {
 		}
 	}
 
-	public static void revert(MinecraftClient client) {
-		ClientWorld world = client.world;
+	public static void revert(Minecraft client) {
+		ClientLevel world = client.level;
 
 		for (Map.Entry<BlockPos, BlockEntity> entry : NEW_BLOCK_ENTITIES.entrySet()) {
 			world.removeBlockEntity(entry.getKey());
 		}
 
 		for (Map.Entry<BlockPos, BlockState> entry : ORIGINAL_BLOCKS.entrySet()) {
-			world.setBlockState(entry.getKey(), entry.getValue(), Block.FORCE_STATE);
+			world.setBlock(entry.getKey(), entry.getValue(), Block.UPDATE_KNOWN_SHAPE);
 		}
 
 		NEW_BLOCK_ENTITIES.clear();
 		ORIGINAL_BLOCKS.clear();
 
-		client.worldRenderer.reload();
+		client.levelRenderer.allChanged();
 	}
 
-	private static BlockState readBlockState(NbtCompound nbt) {
+	private static BlockState readBlockState(CompoundTag nbt) {
 		String name = nbt.getString("Name").get();
 
-		if (!(Identifier.tryParse(name) instanceof Identifier id)) return Blocks.AIR.getDefaultState();
+		if (!(ResourceLocation.tryParse(name) instanceof ResourceLocation id)) return Blocks.AIR.defaultBlockState();
 
-		BlockState state = Registries.BLOCK.getOptionalValue(id).orElse(Blocks.AIR).getDefaultState();
+		BlockState state = BuiltInRegistries.BLOCK.getOptional(id).orElse(Blocks.AIR).defaultBlockState();
 
 		if (nbt.contains("Properties")) {
-			NbtCompound properties = nbt.getCompound("Properties").get();
+			CompoundTag properties = nbt.getCompound("Properties").get();
 			state = applyProperties(state, properties);
 		}
 
@@ -104,31 +104,31 @@ public class ClientStructureUtil {
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	private static BlockState applyProperties(BlockState state, NbtCompound properties) {
-		for (String key : properties.getKeys()) {
-			Property<?> property = state.getBlock().getStateManager().getProperty(key);
+	private static BlockState applyProperties(BlockState state, CompoundTag properties) {
+		for (String key : properties.keySet()) {
+			Property<?> property = state.getBlock().getStateDefinition().getProperty(key);
 			if (property != null) {
 				String value = properties.getString(key).get();
-				Optional<?> optional = property.parse(value);
-				if (optional.isPresent()) state = state.with((Property) property, (Comparable) optional.get());
+				Optional<?> optional = property.getValue(value);
+				if (optional.isPresent()) state = state.setValue((Property) property, (Comparable) optional.get());
 			}
 		}
 		return state;
 	}
 
-	private static void setBlockState(World world, BlockPos pos, BlockState state) {
+	private static void setBlockState(Level world, BlockPos pos, BlockState state) {
 		BlockState original = world.getBlockState(pos);
-		ORIGINAL_BLOCKS.put(pos.toImmutable(), original);
+		ORIGINAL_BLOCKS.put(pos.immutable(), original);
 
-		world.setBlockState(pos, state, Block.FORCE_STATE);
+		world.setBlock(pos, state, Block.UPDATE_KNOWN_SHAPE);
 	}
 
-	private static void addBlockEntity(World world, BlockPos pos, BlockState state, NbtCompound nbt) {
+	private static void addBlockEntity(Level world, BlockPos pos, BlockState state, CompoundTag nbt) {
 		if (state.hasBlockEntity()) {
-			BlockEntity blockEntity = BlockEntity.createFromNbt(pos, state, nbt, world.getRegistryManager());
-			NEW_BLOCK_ENTITIES.put(pos.toImmutable(), blockEntity);
+			BlockEntity blockEntity = BlockEntity.loadStatic(pos, state, nbt, world.registryAccess());
+			NEW_BLOCK_ENTITIES.put(pos.immutable(), blockEntity);
 
-			world.addBlockEntity(blockEntity);
+			world.setBlockEntity(blockEntity);
 		}
 	}
 

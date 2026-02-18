@@ -7,20 +7,20 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
  * Utility class for turning {@link JsonElement} into commonly converted types.
  */
 public class DeserializeUtil {
 
-	public static Identifier toIdentifier(JsonElement element) throws JsonParseException {
+	public static ResourceLocation toIdentifier(JsonElement element) throws JsonParseException {
 		String string = element.getAsString();
-		Identifier out = Identifier.tryParse(string);
+		ResourceLocation out = ResourceLocation.tryParse(string);
 
 		if (out == null) throw new JsonParseException(string + " is not a valid resource location");
 
@@ -38,11 +38,11 @@ public class DeserializeUtil {
 		);
 	}
 
-	public static Vec3d toVec3d(JsonElement element) throws JsonParseException {
+	public static Vec3 toVec3d(JsonElement element) throws JsonParseException {
 		JsonArray jsonArray = element.getAsJsonArray();
 		if (jsonArray.size() != 3) throw new JsonParseException(element + " is not a valid position");
 
-		return new Vec3d(
+		return new Vec3(
 			jsonArray.get(0).getAsDouble(),
 			jsonArray.get(1).getAsDouble(),
 			jsonArray.get(2).getAsDouble()
@@ -66,14 +66,14 @@ public class DeserializeUtil {
 	public static VoxelShape toVoxelShape(JsonElement element) throws JsonParseException {
 		List<List<Double>> array = toDoubleMatrix(element);
 
-		VoxelShape out = VoxelShapes.empty();
+		VoxelShape out = Shapes.empty();
 
 		for (List<Double> shapeArray : array) {
 			int size = shapeArray.size();
 			if (size < 6) throw new JsonParseException(String.format("Shape array too short: Expected %d, got %d", 6, size));
 			if (size > 6) throw new JsonParseException(String.format("Shape array too long: Expected %d, got %d", 6, size));
 
-			out = VoxelShapes.union(out, VoxelShapes.cuboid(
+			out = Shapes.or(out, Shapes.box(
 				shapeArray.get(0)/16D,
 				shapeArray.get(1)/16D,
 				shapeArray.get(2)/16D,

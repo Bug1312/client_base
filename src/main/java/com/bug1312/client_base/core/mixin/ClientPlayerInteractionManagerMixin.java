@@ -12,28 +12,28 @@ import com.bug1312.client_base.core.config.ClientBaseConfig;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.phys.BlockHitResult;
 
 @Environment(EnvType.CLIENT)
-@Mixin(ClientPlayerInteractionManager.class)
+@Mixin(MultiPlayerGameMode.class)
 abstract class ClientPlayerInteractionManagerMixin {
 
-	@Inject(method = { "breakBlock", "attackBlock", "updateBlockBreakingProgress" }, at = @At("HEAD"), cancellable = true)
+	@Inject(method = { "destroyBlock", "startDestroyBlock", "continueDestroyBlock" }, at = @At("HEAD"), cancellable = true)
 	private void client_base$disableClientBaseBlockBreaking(CallbackInfoReturnable<Boolean> ci) {
 		if (ClientBaseApi.isBaseActive()) ci.setReturnValue(false);
 	}
 
-	@Inject(method = "interactBlock", at = @At("HEAD"), cancellable = true)
-	private void client_base$clientBaseInteractions(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> ci) {
+	@Inject(method = "useItemOn", at = @At("HEAD"), cancellable = true)
+	private void client_base$clientBaseInteractions(LocalPlayer player, InteractionHand hand, BlockHitResult hitResult, CallbackInfoReturnable<InteractionResult> ci) {
 		if (ClientBaseApi.isBaseActive()) {
-			BlockHitResult newHitResult = hitResult.withBlockPos(ClientBaseApi.toStructurePos(hitResult.getBlockPos()));
+			BlockHitResult newHitResult = hitResult.withPosition(ClientBaseApi.toStructurePos(hitResult.getBlockPos()));
 
 			for (var interaction : ClientBaseConfig.getInstance().interactions()) {
-				if (!(ClientBaseRegistries.POS_INTERACTION.containsId(interaction.getInteractionId()))) continue;
+				if (!(ClientBaseRegistries.POS_INTERACTION.containsKey(interaction.getInteractionId()))) continue;
 				ClientBaseEvents.INTERACT.invoker().onInteraction(interaction, player, hand, newHitResult);
 			}
 		}

@@ -14,19 +14,19 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.ChestBlockEntity;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
  * {@link RendererType Renderer} that will take in a {@link BlockEntityRenderer}
@@ -34,25 +34,25 @@ import net.minecraft.util.shape.VoxelShapes;
  * 	to add custom non-JSON Block Model rendering
  */
 public record BlockEntityRenderer(
-	Identifier rendererId,
+	ResourceLocation rendererId,
 	VoxelShape shape
 ) implements RendererType, EasyPlaceable {
 
-	public static final Identifier COMPOUND_ID = Identifier.of(ClientBaseModCoreInitializer.MOD_ID, "block_entity_renderer");
+	public static final ResourceLocation COMPOUND_ID = ResourceLocation.fromNamespaceAndPath(ClientBaseModCoreInitializer.MOD_ID, "block_entity_renderer");
 
 	@Override
-	public void place(ClientWorld world, BlockPos pos) {
-		BlockState state = Blocks.CHEST.getDefaultState();
-		world.setBlockState(pos, state);
-		NbtCompound nbt = new NbtCompound();
-		NbtCompound customCompound = new NbtCompound();
+	public void place(ClientLevel world, BlockPos pos) {
+		BlockState state = Blocks.CHEST.defaultBlockState();
+		world.setBlockAndUpdate(pos, state);
+		CompoundTag nbt = new CompoundTag();
+		CompoundTag customCompound = new CompoundTag();
 		customCompound.putString(COMPOUND_ID.toString(), rendererId.toString());
 		ItemStack stack = new ItemStack(Blocks.STONE);
-		stack.apply(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(customCompound), UnaryOperator.identity());
+		stack.update(DataComponents.CUSTOM_DATA, CustomData.of(customCompound), UnaryOperator.identity());
 		nbt.putString("id", "minecraft:chest");
-		BlockEntity blockEntity = BlockEntity.createFromNbt(pos, state, nbt, world.getRegistryManager());
-		if (blockEntity instanceof ChestBlockEntity chest) chest.setStack(0, stack);
-		if (blockEntity != null) world.addBlockEntity(blockEntity);
+		BlockEntity blockEntity = BlockEntity.loadStatic(pos, state, nbt, world.registryAccess());
+		if (blockEntity instanceof ChestBlockEntity chest) chest.setItem(0, stack);
+		if (blockEntity != null) world.setBlockEntity(blockEntity);
 	}
 
 	public static class Deserializer implements JsonDeserializer<RendererType> {
@@ -60,9 +60,9 @@ public record BlockEntityRenderer(
 		public RendererType deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
 			JsonObject obj = json.getAsJsonObject();
 
-			Identifier rendererId = DeserializeUtil.toIdentifier(obj.get("renderer"));
+			ResourceLocation rendererId = DeserializeUtil.toIdentifier(obj.get("renderer"));
 
-			VoxelShape shape = (obj.has("hitbox")) ? DeserializeUtil.toVoxelShape(obj.get("hitbox")) : VoxelShapes.fullCube();
+			VoxelShape shape = (obj.has("hitbox")) ? DeserializeUtil.toVoxelShape(obj.get("hitbox")) : Shapes.block();
 
 			return new BlockEntityRenderer(rendererId, shape);
 		}

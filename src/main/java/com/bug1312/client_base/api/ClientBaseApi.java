@@ -8,9 +8,9 @@ import com.bug1312.client_base.core.util.SetupUtil;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 
 @Environment(EnvType.CLIENT)
 public final class ClientBaseApi {
@@ -19,11 +19,11 @@ public final class ClientBaseApi {
 	}
 
 	public static void activateBase() {
-		SetupUtil.construct(MinecraftClient.getInstance());
+		SetupUtil.construct(Minecraft.getInstance());
 	}
 
 	public static void deactivateBase() {
-		SetupUtil.deconstruct(MinecraftClient.getInstance());
+		SetupUtil.deconstruct(Minecraft.getInstance());
 	}
 
 	/**
@@ -42,7 +42,7 @@ public final class ClientBaseApi {
 	@Nullable
 	public static BlockPos toStructurePos(BlockPos realPos) {
 		if (SetupUtil.getStartPos() == null) return null;
-		Vec3i offset = SetupUtil.getStartPos().add(ClientBaseConfig.getInstance().structureConfig().offset());
+		Vec3i offset = SetupUtil.getStartPos().offset(ClientBaseConfig.getInstance().structureConfig().offset());
 		return realPos.subtract(offset);
 	}
 

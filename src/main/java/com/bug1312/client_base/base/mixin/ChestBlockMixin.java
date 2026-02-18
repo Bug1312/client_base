@@ -14,32 +14,32 @@ import com.bug1312.client_base.base.config.renderer.BlockEntityRenderer;
 import com.bug1312.client_base.base.config.renderer.FakeBlockRenderer;
 import com.bug1312.client_base.core.config.ClientBaseConfig;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ChestBlock;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.block.entity.ChestBlockEntity;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 @Mixin(ChestBlock.class)
 abstract class ChestBlockMixin {
 
-	@Inject(method = "getOutlineShape", at = @At("HEAD"), cancellable = true)
-	private void getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context, CallbackInfoReturnable<VoxelShape> ci) {
+	@Inject(method = "getShape", at = @At("HEAD"), cancellable = true)
+	private void getOutlineShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context, CallbackInfoReturnable<VoxelShape> ci) {
 		if (
 			!ClientBaseApi.isBaseActive()
 			|| !(world.getBlockEntity(pos) instanceof ChestBlockEntity blockEntity)
 		) return;
 
-		ItemStack stack = blockEntity.getStack(0);
+		ItemStack stack = blockEntity.getItem(0);
 		if (stack == null) return;
-		NbtCompound nbt = stack.getComponents().getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(new NbtCompound())).copyNbt();
+		CompoundTag nbt = stack.getComponents().getOrDefault(DataComponents.CUSTOM_DATA, CustomData.of(new CompoundTag())).copyTag();
 		if (nbt == null) return;
 
 		Optional<String> fakeBlockIdOpt = nbt.getString(FakeBlockRenderer.COMPOUND_ID.toString());
@@ -50,7 +50,7 @@ abstract class ChestBlockMixin {
 		if (
 			fakeBlockIdOpt.isPresent()
 			&& fakeBlockIdOpt.get() instanceof String string
-			&& Identifier.tryParse(string) instanceof Identifier id
+			&& ResourceLocation.tryParse(string) instanceof ResourceLocation id
 		) {
 			Optional<FakeBlockRenderer> fakeBlockRenderer = renderers.stream()
 				.filter(renderer -> (
@@ -66,7 +66,7 @@ abstract class ChestBlockMixin {
 		if (
 			blockEntityRendererIdOpt.isPresent()
 			&& blockEntityRendererIdOpt.get() instanceof String string
-			&& Identifier.tryParse(string) instanceof Identifier id
+			&& ResourceLocation.tryParse(string) instanceof ResourceLocation id
 		) {
 			Optional<BlockEntityRenderer> blockEntityRenderer = renderers.stream()
 				.filter(renderer -> (

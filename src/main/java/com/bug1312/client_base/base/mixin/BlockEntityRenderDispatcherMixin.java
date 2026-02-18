@@ -11,51 +11,51 @@ import com.bug1312.client_base.api.ClientBaseApi;
 import com.bug1312.client_base.api.ClientBaseRegistries;
 import com.bug1312.client_base.base.ClientBaseModelLoadingPlugin;
 import com.bug1312.client_base.base.config.renderer.FakeBlockRenderer;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.model.loading.v1.ExtraModelKey;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.ChestBlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.client.render.block.BlockModelRenderer;
-import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
-import net.minecraft.client.render.block.entity.BlockEntityRenderer;
-import net.minecraft.client.render.model.BakedModelManager;
-import net.minecraft.client.render.model.BlockStateModel;
-import net.minecraft.client.texture.SpriteAtlasTexture;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.ModelBlockRenderer;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.resources.model.ModelManager;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 @Mixin(BlockEntityRenderDispatcher.class)
 abstract class BlockEntityRenderDispatcherMixin {
 
 	@Inject(
-		method = "Lnet/minecraft/client/render/block/entity/BlockEntityRenderDispatcher;render(Lnet/minecraft/client/render/block/entity/BlockEntityRenderer;Lnet/minecraft/block/entity/BlockEntity;FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;Lnet/minecraft/util/math/Vec3d;)V",
+		method = "setupAndRender",
 		at = @At("HEAD"),
 		cancellable = true
 	)
-	private static <T extends BlockEntity> void client_base$fakeBlockRenderer(BlockEntityRenderer<T> renderer, T blockEntity, float tickProgress, MatrixStack matrices, VertexConsumerProvider vertexConsumers, Vec3d cameraPos, CallbackInfo ci) {
+	private static <T extends BlockEntity> void client_base$fakeBlockRenderer(BlockEntityRenderer<T> renderer, T blockEntity, float tickProgress, PoseStack matrices, MultiBufferSource vertexConsumers, Vec3 cameraPos, CallbackInfo ci) {
 		if (
 			!ClientBaseApi.isBaseActive()
 			|| !(blockEntity instanceof ChestBlockEntity be)
 		) return;
 
-		ItemStack stack = be.getStack(0);
+		ItemStack stack = be.getItem(0);
 		if (stack == null) return;
-		NbtCompound nbt = stack.getComponents().getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(new NbtCompound())).copyNbt();
+		CompoundTag nbt = stack.getComponents().getOrDefault(DataComponents.CUSTOM_DATA, CustomData.of(new CompoundTag())).copyTag();
 		if (nbt == null) return;
 
 		Optional<String> fakeBlockIdOpt = nbt.getString(FakeBlockRenderer.COMPOUND_ID.toString());
@@ -64,25 +64,25 @@ abstract class BlockEntityRenderDispatcherMixin {
 		if (
 			fakeBlockIdOpt.isPresent()
 			&& fakeBlockIdOpt.get() instanceof String string
-			&& Identifier.tryParse(string) instanceof Identifier id
+			&& ResourceLocation.tryParse(string) instanceof ResourceLocation id
 			&& ClientBaseModelLoadingPlugin.MODEL_KEY_MAP.containsKey(id)
 		) {
-			World world = blockEntity.getWorld();
-			int light = (world != null) ? WorldRenderer.getLightmapCoordinates(world, blockEntity.getPos()) : 15728880;
+			Level world = blockEntity.getLevel();
+			int light = (world != null) ? LevelRenderer.getLightColor(world, blockEntity.getBlockPos()) : 15728880;
 
 			ExtraModelKey<BlockStateModel> key = ClientBaseModelLoadingPlugin.MODEL_KEY_MAP.get(id);
-			BakedModelManager bakedModelManager = MinecraftClient.getInstance().getBakedModelManager();
+			ModelManager bakedModelManager = Minecraft.getInstance().getModelManager();
 			BlockStateModel bakedModel = bakedModelManager.getModel(key);
 			if (bakedModel != null) {
-				matrices.push();
+				matrices.pushPose();
 
 				@SuppressWarnings("deprecation")
-				Identifier blockAtlasIdentifier = SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE;
-				VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderLayer.getEntityTranslucent(blockAtlasIdentifier));
+				ResourceLocation blockAtlasIdentifier = TextureAtlas.LOCATION_BLOCKS;
+				VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RenderType.entityTranslucent(blockAtlasIdentifier));
 
-				BlockModelRenderer.render(matrices.peek(), vertexConsumer, bakedModel, 1, 1, 1, light, OverlayTexture.DEFAULT_UV);
+				ModelBlockRenderer.renderModel(matrices.last(), vertexConsumer, bakedModel, 1, 1, 1, light, OverlayTexture.NO_OVERLAY);
 
-				matrices.pop();
+				matrices.popPose();
 
 				ci.cancel();
 				return;
@@ -92,16 +92,16 @@ abstract class BlockEntityRenderDispatcherMixin {
 		if (
 			blockEntityRendererIdOpt.isPresent()
 			&& blockEntityRendererIdOpt.get() instanceof String string
-			&& Identifier.tryParse(string) instanceof Identifier id
-			&& ClientBaseRegistries.BLOCK_ENTITY_RENDERER.containsId(id)
+			&& ResourceLocation.tryParse(string) instanceof ResourceLocation id
+			&& ClientBaseRegistries.BLOCK_ENTITY_RENDERER.containsKey(id)
 		) {
-			BlockEntityRenderer<BlockEntity> newRenderer = ClientBaseRegistries.BLOCK_ENTITY_RENDERER.get(id);
-			World world = blockEntity.getWorld();
-			int light = (world != null) ? WorldRenderer.getLightmapCoordinates(world, blockEntity.getPos()) : 15728880;
+			BlockEntityRenderer<BlockEntity> newRenderer = ClientBaseRegistries.BLOCK_ENTITY_RENDERER.getValue(id);
+			Level world = blockEntity.getLevel();
+			int light = (world != null) ? LevelRenderer.getLightColor(world, blockEntity.getBlockPos()) : 15728880;
 
-			matrices.push();
-			newRenderer.render(blockEntity, tickProgress, matrices, vertexConsumers, light, OverlayTexture.DEFAULT_UV, cameraPos);
-			matrices.pop();
+			matrices.pushPose();
+			newRenderer.render(blockEntity, tickProgress, matrices, vertexConsumers, light, OverlayTexture.NO_OVERLAY, cameraPos);
+			matrices.popPose();
 
 			ci.cancel();
 			return;

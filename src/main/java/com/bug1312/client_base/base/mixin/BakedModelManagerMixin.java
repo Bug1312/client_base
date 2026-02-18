@@ -11,10 +11,10 @@ import com.bug1312.client_base.core.config.ClientBaseConfig;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.render.model.BakedModelManager;
+import net.minecraft.client.resources.model.ModelManager;
 
 @Environment(EnvType.CLIENT)
-@Mixin(BakedModelManager.class)
+@Mixin(ModelManager.class)
 abstract class BakedModelManagerMixin {
 
 	@Inject(method = "reload", at = @At("HEAD"))

@@ -6,34 +6,34 @@ import com.bug1312.client_base.api.PassthroughPacket;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.network.packet.c2s.common.ClientOptionsC2SPacket;
-import net.minecraft.network.packet.c2s.common.KeepAliveC2SPacket;
-import net.minecraft.network.packet.c2s.play.AdvancementTabC2SPacket;
-import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
-import net.minecraft.network.packet.c2s.play.BundleItemSelectedC2SPacket;
-import net.minecraft.network.packet.c2s.play.ChangeGameModeC2SPacket;
-import net.minecraft.network.packet.c2s.play.ChatCommandSignedC2SPacket;
-import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
-import net.minecraft.network.packet.c2s.play.CommandExecutionC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-import net.minecraft.network.packet.c2s.play.SlotChangedStateC2SPacket;
-import net.minecraft.network.packet.c2s.play.UpdateDifficultyC2SPacket;
-import net.minecraft.network.packet.c2s.play.UpdateDifficultyLockC2SPacket;
+import net.minecraft.network.protocol.common.ServerboundClientInformationPacket;
+import net.minecraft.network.protocol.common.ServerboundKeepAlivePacket;
+import net.minecraft.network.protocol.game.ServerboundChangeDifficultyPacket;
+import net.minecraft.network.protocol.game.ServerboundChangeGameModePacket;
+import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
+import net.minecraft.network.protocol.game.ServerboundChatCommandSignedPacket;
+import net.minecraft.network.protocol.game.ServerboundChatPacket;
+import net.minecraft.network.protocol.game.ServerboundContainerSlotStateChangedPacket;
+import net.minecraft.network.protocol.game.ServerboundEditBookPacket;
+import net.minecraft.network.protocol.game.ServerboundLockDifficultyPacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.network.protocol.game.ServerboundSeenAdvancementsPacket;
+import net.minecraft.network.protocol.game.ServerboundSelectBundleItemPacket;
 
 @Environment(EnvType.CLIENT)
 @Mixin({
-	AdvancementTabC2SPacket.class,
-	BookUpdateC2SPacket.class,
-	ChatCommandSignedC2SPacket.class,
-	ChatMessageC2SPacket.class,
-	ClientOptionsC2SPacket.class,
-	CommandExecutionC2SPacket.class,
-	KeepAliveC2SPacket.class,
-	PlayerActionC2SPacket.class,
-	SlotChangedStateC2SPacket.class,
-	UpdateDifficultyC2SPacket.class,
-	UpdateDifficultyLockC2SPacket.class,
-	ChangeGameModeC2SPacket.class,
-	BundleItemSelectedC2SPacket.class,
+	ServerboundSeenAdvancementsPacket.class,
+	ServerboundEditBookPacket.class,
+	ServerboundChatCommandSignedPacket.class,
+	ServerboundChatPacket.class,
+	ServerboundClientInformationPacket.class,
+	ServerboundChatCommandPacket.class,
+	ServerboundKeepAlivePacket.class,
+	ServerboundPlayerActionPacket.class,
+	ServerboundContainerSlotStateChangedPacket.class,
+	ServerboundChangeDifficultyPacket.class,
+	ServerboundLockDifficultyPacket.class,
+	ServerboundChangeGameModePacket.class,
+	ServerboundSelectBundleItemPacket.class,
 })
 class PassThrough implements PassthroughPacket { }

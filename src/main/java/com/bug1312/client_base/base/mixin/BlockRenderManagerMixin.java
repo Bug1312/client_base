@@ -15,28 +15,28 @@ import com.bug1312.client_base.core.config.ClientBaseConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.model.loading.v1.ExtraModelKey;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.block.BlockModels;
-import net.minecraft.client.render.block.BlockRenderManager;
-import net.minecraft.client.render.model.BakedModelManager;
-import net.minecraft.client.render.model.BlockStateModel;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.BlockModelShaper;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.resources.model.ModelManager;
+import net.minecraft.world.level.block.state.BlockState;
 
 @Environment(EnvType.CLIENT)
-@Mixin(BlockRenderManager.class)
+@Mixin(BlockRenderDispatcher.class)
 abstract class BlockRenderManagerMixin {
 
 	@Shadow() @Final()
-	private BlockModels models;
+	private BlockModelShaper blockModelShaper;
 
-	@Inject(method = "getModel", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "getBlockModel", at = @At("HEAD"), cancellable = true)
 	private void client_base$blockModelRendererReplace(BlockState state, CallbackInfoReturnable<BlockStateModel> ci) {
 		if (!ClientBaseApi.isBaseActive()) return;
 
 		for (var entry : ClientBaseConfig.getInstance().renderers().entrySet()) {
 			if (!(entry.getValue() instanceof BlockModelRenderer blockModelRenderer)) continue;
 			if (!blockModelRenderer.matcher().matches(state)) continue;
-			BakedModelManager bakedModelManager = MinecraftClient.getInstance().getBakedModelManager();
+			ModelManager bakedModelManager = Minecraft.getInstance().getModelManager();
 			ExtraModelKey<BlockStateModel> key = ClientBaseModelLoadingPlugin.MODEL_KEY_MAP.get(blockModelRenderer.model());
 			if (key == null) continue;
 

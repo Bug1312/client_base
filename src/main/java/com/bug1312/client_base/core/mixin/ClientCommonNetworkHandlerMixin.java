@@ -10,14 +10,14 @@ import com.bug1312.client_base.core.util.DesyncUtil;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.network.ClientCommonNetworkHandler;
-import net.minecraft.network.packet.Packet;
+import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
+import net.minecraft.network.protocol.Packet;
 
 @Environment(EnvType.CLIENT)
-@Mixin(ClientCommonNetworkHandler.class)
+@Mixin(ClientCommonPacketListenerImpl.class)
 abstract class ClientCommonNetworkHandlerMixin {
 
-	@Inject(method = "sendPacket", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "send", at = @At("HEAD"), cancellable = true)
 	private void client_base$blockPacketsWhenDesynced(Packet<?> packet, CallbackInfo ci) {
 		if (!DesyncUtil.isSynced() && !(packet instanceof PassthroughPacket)) ci.cancel();
 	}

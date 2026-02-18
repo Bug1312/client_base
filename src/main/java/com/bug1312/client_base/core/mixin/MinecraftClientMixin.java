@@ -9,10 +9,10 @@ import com.bug1312.client_base.core.util.DesyncUtil;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 
 @Environment(EnvType.CLIENT)
-@Mixin(MinecraftClient.class)
+@Mixin(Minecraft.class)
 abstract class MinecraftClientMixin {
 
 	@Inject(method = "isPaused", at = @At("RETURN"), cancellable = true)

@@ -11,10 +11,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * {@link RendererType Renderer} that will replace the model used by a blockstate.
@@ -23,13 +23,13 @@ import net.minecraft.util.math.BlockPos;
  */
 public record BlockModelRenderer(
 	BlockStateMatcher matcher,
-	Identifier model
+	ResourceLocation model
 ) implements RendererType, EasyPlaceable {
 
 	@Override
-	public void place(ClientWorld world, BlockPos pos) {
+	public void place(ClientLevel world, BlockPos pos) {
 		BlockState state = matcher().toBlockState(world);
-		if (state != null) world.setBlockState(pos, state);
+		if (state != null) world.setBlockAndUpdate(pos, state);
 	}
 
 	public static class Deserializer implements JsonDeserializer<RendererType> {
@@ -37,10 +37,10 @@ public record BlockModelRenderer(
 		public RendererType deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
 			JsonObject obj = json.getAsJsonObject();
 
-			Identifier model = DeserializeUtil.toIdentifier(obj.get("model"));
+			ResourceLocation model = DeserializeUtil.toIdentifier(obj.get("model"));
 
 			JsonObject replaceStateObj = obj.get("replace_state").getAsJsonObject();
-			Identifier blockId = DeserializeUtil.toIdentifier(replaceStateObj.get("block"));
+			ResourceLocation blockId = DeserializeUtil.toIdentifier(replaceStateObj.get("block"));
 			BlockStateMatcher matcher = BlockStateMatcher.of(blockId, replaceStateObj.get("state").getAsString());
 			if (matcher == null) return null;
 
