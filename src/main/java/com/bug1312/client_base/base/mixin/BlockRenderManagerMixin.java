@@ -38,6 +38,7 @@ abstract class BlockRenderManagerMixin {
 			if (!blockModelRenderer.matcher().matches(state)) continue;
 			BakedModelManager bakedModelManager = MinecraftClient.getInstance().getBakedModelManager();
 			ExtraModelKey<BlockStateModel> key = ClientBaseModelLoadingPlugin.MODEL_KEY_MAP.get(blockModelRenderer.model());
+			if (key == null) continue;
 
 			ci.setReturnValue(bakedModelManager.getModel(key));
 			return;
