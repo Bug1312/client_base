@@ -8,6 +8,7 @@ import com.bug1312.client_base.core.config.ClientBaseConfig;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
@@ -78,7 +79,7 @@ public class ClientStructureUtil {
 		}
 
 		for (Map.Entry<BlockPos, BlockState> entry : ORIGINAL_BLOCKS.entrySet()) {
-			world.setBlockState(entry.getKey(), entry.getValue(), 0);
+			world.setBlockState(entry.getKey(), entry.getValue(), Block.FORCE_STATE);
 		}
 
 		NEW_BLOCK_ENTITIES.clear();
@@ -119,7 +120,7 @@ public class ClientStructureUtil {
 		BlockState original = world.getBlockState(pos);
 		ORIGINAL_BLOCKS.put(pos.toImmutable(), original);
 
-		world.setBlockState(pos, state, 0);
+		world.setBlockState(pos, state, Block.FORCE_STATE);
 	}
 
 	private static void addBlockEntity(World world, BlockPos pos, BlockState state, NbtCompound nbt) {
