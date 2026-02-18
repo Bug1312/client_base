@@ -32,6 +32,7 @@ import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
@@ -52,7 +53,10 @@ abstract class BlockEntityRenderDispatcherMixin {
 			|| !(blockEntity instanceof ChestBlockEntity be)
 		) return;
 
-		NbtCompound nbt = be.getStack(0).getComponents().getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(new NbtCompound())).copyNbt();
+		ItemStack stack = be.getStack(0);
+		if (stack == null) return;
+		NbtCompound nbt = stack.getComponents().getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(new NbtCompound())).copyNbt();
+		if (nbt == null) return;
 
 		Optional<String> fakeBlockIdOpt = nbt.getString(FakeBlockRenderer.COMPOUND_ID.toString());
 		Optional<String> blockEntityRendererIdOpt = nbt.getString(com.bug1312.client_base.base.config.renderer.BlockEntityRenderer.COMPOUND_ID.toString());
