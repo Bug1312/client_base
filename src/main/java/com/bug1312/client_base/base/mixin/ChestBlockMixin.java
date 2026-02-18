@@ -18,6 +18,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.ChestBlockEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -34,7 +35,10 @@ abstract class ChestBlockMixin {
 			|| !(world.getBlockEntity(pos) instanceof ChestBlockEntity blockEntity)
 		) return;
 
-		NbtCompound nbt = blockEntity.getStack(0).getNbt();
+		ItemStack stack = blockEntity.getStack(0);
+		if (stack == null) return;
+		NbtCompound nbt = stack.getNbt();
+		if (nbt == null) return;
 
 		Optional<String> fakeBlockIdOpt = Optional.of(nbt.getString(FakeBlockRenderer.COMPOUND_ID.toString()));
 		Optional<String> blockEntityRendererIdOpt = Optional.of(nbt.getString(BlockEntityRenderer.COMPOUND_ID.toString()));

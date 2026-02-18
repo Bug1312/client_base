@@ -29,6 +29,7 @@ import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedModelManager;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
@@ -48,7 +49,10 @@ abstract class BlockEntityRenderDispatcherMixin {
 			|| !(blockEntity instanceof ChestBlockEntity be)
 		) return;
 
-		NbtCompound nbt = be.getStack(0).getNbt();
+		ItemStack stack = be.getStack(0);
+		if (stack == null) return;
+		NbtCompound nbt = stack.getNbt();
+		if (nbt == null) return;
 
 		Optional<String> fakeBlockIdOpt = Optional.of(nbt.getString(FakeBlockRenderer.COMPOUND_ID.toString()));
 		Optional<String> blockEntityRendererIdOpt = Optional.of(nbt.getString(com.bug1312.client_base.base.config.renderer.BlockEntityRenderer.COMPOUND_ID.toString()));
