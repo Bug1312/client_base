@@ -30,7 +30,7 @@ abstract class BlockRenderManagerMixin {
 
 	@Inject(method = "getModel", at = @At("HEAD"), cancellable = true)
 	private void client_base$blockModelRendererReplace(BlockState state, CallbackInfoReturnable<BakedModel> ci) {
-		if (ClientBaseApi.isBaseActive()) return;
+		if (!ClientBaseApi.isBaseActive()) return;
 
 		for (var entry : ClientBaseConfig.getInstance().renderers().entrySet()) {
 			if (!(entry.getValue() instanceof BlockModelRenderer blockModelRenderer)) continue;
