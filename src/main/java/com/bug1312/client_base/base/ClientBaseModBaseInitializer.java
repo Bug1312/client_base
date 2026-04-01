@@ -18,7 +18,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -33,7 +33,7 @@ import net.minecraft.resources.Identifier;
 public class ClientBaseModBaseInitializer implements ClientModInitializer {
 
 	public static final KeyMapping.Category CATEGORY = new KeyMapping.Category(Identifier.fromNamespaceAndPath(ClientBaseModCoreInitializer.MOD_ID, "keybinds"));
-	public static final KeyMapping KEYBIND = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.client_base.toggle", GLFW.GLFW_KEY_HOME, CATEGORY));
+	public static final KeyMapping KEYBIND = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.client_base.toggle", GLFW.GLFW_KEY_HOME, CATEGORY));
 
 	@Override
 	public void onInitializeClient() {
