@@ -31,7 +31,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 abstract class ChestBlockMixin {
 
 	@Inject(method = "getShape", at = @At("HEAD"), cancellable = true)
-	private void getOutlineShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context, CallbackInfoReturnable<VoxelShape> ci) {
+	private void client_base$setCustomShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context, CallbackInfoReturnable<VoxelShape> ci) {
 		if (
 			!ClientBaseApi.isBaseActive()
 			|| !(world.getBlockEntity(pos) instanceof ChestBlockEntity blockEntity)
