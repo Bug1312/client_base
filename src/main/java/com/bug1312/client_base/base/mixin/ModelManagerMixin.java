@@ -15,7 +15,7 @@ import net.minecraft.client.resources.model.ModelManager;
 
 @Environment(EnvType.CLIENT)
 @Mixin(ModelManager.class)
-abstract class BakedModelManagerMixin {
+abstract class ModelManagerMixin {
 
 	@Inject(method = "reload", at = @At("HEAD"))
 	private final void client_base$reloadConfigBeforeAssets(CallbackInfoReturnable<CompletableFuture<Void>> ci) {

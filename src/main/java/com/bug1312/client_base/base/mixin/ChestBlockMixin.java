@@ -17,7 +17,7 @@ import com.bug1312.client_base.core.config.ClientBaseConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.BlockGetter;
@@ -50,7 +50,7 @@ abstract class ChestBlockMixin {
 		if (
 			fakeBlockIdOpt.isPresent()
 			&& fakeBlockIdOpt.get() instanceof String string
-			&& ResourceLocation.tryParse(string) instanceof ResourceLocation id
+			&& Identifier.tryParse(string) instanceof Identifier id
 		) {
 			Optional<FakeBlockRenderer> fakeBlockRenderer = renderers.stream()
 				.filter(renderer -> (
@@ -66,7 +66,7 @@ abstract class ChestBlockMixin {
 		if (
 			blockEntityRendererIdOpt.isPresent()
 			&& blockEntityRendererIdOpt.get() instanceof String string
-			&& ResourceLocation.tryParse(string) instanceof ResourceLocation id
+			&& Identifier.tryParse(string) instanceof Identifier id
 		) {
 			Optional<BlockEntityRenderer> blockEntityRenderer = renderers.stream()
 				.filter(renderer -> (

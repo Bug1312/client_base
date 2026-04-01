@@ -28,7 +28,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public record ClientBaseConfig(
 	StructureConfig structureConfig,
@@ -86,7 +86,7 @@ public record ClientBaseConfig(
 				for (var entry : renderersObj.entrySet()) {
 					JsonObject rendererObj = entry.getValue().getAsJsonObject();
 					String typeString = rendererObj.get("type").getAsString();
-					if (!(ResourceLocation.tryParse(typeString) instanceof ResourceLocation typeId)) break;
+					if (!(Identifier.tryParse(typeString) instanceof Identifier typeId)) break;
 					ClientBaseRegistries.RENDERER_TYPE.getOptional(typeId).ifPresent(registryEntry -> {
 						Gson gson = new GsonBuilder().registerTypeAdapter(RendererType.class, registryEntry).create();
 						renderers.put(entry.getKey(), gson.fromJson(rendererObj, RendererType.class));
@@ -101,7 +101,7 @@ public record ClientBaseConfig(
 				for (var entry : array.asList()) {
 					JsonObject arrayObj = entry.getAsJsonObject();
 					String typeString = arrayObj.get("type").getAsString();
-					if (!(ResourceLocation.tryParse(typeString) instanceof ResourceLocation typeId)) break;
+					if (!(Identifier.tryParse(typeString) instanceof Identifier typeId)) break;
 					ClientBaseRegistries.INTERACTION_TYPE.getOptional(typeId).ifPresent(registryEntry -> {
 						Gson gson = new GsonBuilder().registerTypeAdapter(InteractionType.class, registryEntry).create();
 						interactions.add(gson.fromJson(arrayObj, InteractionType.class));

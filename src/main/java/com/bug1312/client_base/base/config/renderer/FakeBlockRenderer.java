@@ -19,7 +19,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.block.Blocks;
@@ -36,11 +36,11 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * This will allow for endless custom blocks without the need to create a new Java integration.
  */
 public record FakeBlockRenderer(
-	ResourceLocation model,
+	Identifier model,
 	VoxelShape shape
 ) implements RendererType, EasyPlaceable {
 
-	public static final ResourceLocation COMPOUND_ID = ResourceLocation.fromNamespaceAndPath(ClientBaseModCoreInitializer.MOD_ID, "fake_block_renderer");
+	public static final Identifier COMPOUND_ID = Identifier.fromNamespaceAndPath(ClientBaseModCoreInitializer.MOD_ID, "fake_block_renderer");
 
 	@Override
 	public void place(ClientLevel world, BlockPos pos) {
@@ -62,7 +62,7 @@ public record FakeBlockRenderer(
 		public RendererType deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
 			JsonObject obj = json.getAsJsonObject();
 
-			ResourceLocation model = DeserializeUtil.toIdentifier(obj.get("model"));
+			Identifier model = DeserializeUtil.toIdentifier(obj.get("model"));
 
 			VoxelShape shape = (obj.has("hitbox")) ? DeserializeUtil.toVoxelShape(obj.get("hitbox")) : Shapes.block();
 

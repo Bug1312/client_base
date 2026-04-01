@@ -8,7 +8,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -18,9 +18,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  */
 public class DeserializeUtil {
 
-	public static ResourceLocation toIdentifier(JsonElement element) throws JsonParseException {
+	public static Identifier toIdentifier(JsonElement element) throws JsonParseException {
 		String string = element.getAsString();
-		ResourceLocation out = ResourceLocation.tryParse(string);
+		Identifier out = Identifier.tryParse(string);
 
 		if (out == null) throw new JsonParseException(string + " is not a valid resource location");
 

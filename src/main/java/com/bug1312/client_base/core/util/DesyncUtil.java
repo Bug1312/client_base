@@ -11,7 +11,7 @@ import net.minecraft.world.phys.Vec3;
 @Environment(EnvType.CLIENT)
 public class DesyncUtil {
 
-	public static final ClientPlayConnectionEvents.Disconnect DISCONNECT_HANDLER = (handler, client) -> { resync(client); };
+	public static final ClientPlayConnectionEvents.Disconnect DISCONNECT_HANDLER = (_, client) -> { resync(client); };
 
 	@Nullable()
 	static PlayerState previousState;

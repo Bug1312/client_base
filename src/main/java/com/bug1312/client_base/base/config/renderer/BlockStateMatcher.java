@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -44,17 +44,17 @@ public class BlockStateMatcher {
 	 * Used to parse strings familiar with the blockstate JSON variant models into
 	 * 	a class for matching blockstates with desired input.
 	 *
-	 * @param blockId Block {@link ResourceLocation}
+	 * @param blockId Block {@link Identifier}
 	 * @param stateString Blockstate variant string. Does not need to be single blockstate with all properties
 	 *
 	 * @apiNote A highly adaptable blockstate that has no use in the Client Base is
 	 * 	a noteblock.
 	 *
 	 * @example
-	 * 	<code>{@link BlockStateMatcher#of}({@link ResourceLocation#withDefaultNamespace}("noteblock"), "instrument=harp,note=1");</code>
+	 * 	<code>{@link BlockStateMatcher#of}({@link Identifier#withDefaultNamespace}("noteblock"), "instrument=harp,note=1");</code>
 	 */
 	@Nullable
-	public static BlockStateMatcher of(ResourceLocation blockId, String stateString) {
+	public static BlockStateMatcher of(Identifier blockId, String stateString) {
 		if (!BuiltInRegistries.BLOCK.containsKey(blockId)) return null;
 
 		Block block = BuiltInRegistries.BLOCK.getValue(blockId);

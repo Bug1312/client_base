@@ -3,9 +3,11 @@
 	"package": "com.bug1312.client_base.base.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
-		"BakedModelManagerMixin",
+		"ChestRendererMixin",
+		"ChestRenderStateMixin",
+		"ModelManagerMixin",
 		"BlockEntityRenderDispatcherMixin",
-		"BlockRenderManagerMixin",
+		"BlockStateModelSetMixin",
 		"ChestBlockMixin",
 		"PassThrough"
 	],

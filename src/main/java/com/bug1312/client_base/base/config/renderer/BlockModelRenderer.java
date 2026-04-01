@@ -13,7 +13,7 @@ import com.google.gson.JsonParseException;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
@@ -23,7 +23,7 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 public record BlockModelRenderer(
 	BlockStateMatcher matcher,
-	ResourceLocation model
+	Identifier model
 ) implements RendererType, EasyPlaceable {
 
 	@Override
@@ -37,10 +37,10 @@ public record BlockModelRenderer(
 		public RendererType deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
 			JsonObject obj = json.getAsJsonObject();
 
-			ResourceLocation model = DeserializeUtil.toIdentifier(obj.get("model"));
+			Identifier model = DeserializeUtil.toIdentifier(obj.get("model"));
 
 			JsonObject replaceStateObj = obj.get("replace_state").getAsJsonObject();
-			ResourceLocation blockId = DeserializeUtil.toIdentifier(replaceStateObj.get("block"));
+			Identifier blockId = DeserializeUtil.toIdentifier(replaceStateObj.get("block"));
 			BlockStateMatcher matcher = BlockStateMatcher.of(blockId, replaceStateObj.get("state").getAsString());
 			if (matcher == null) return null;
 

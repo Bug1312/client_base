@@ -14,7 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -91,7 +91,7 @@ public class ClientStructureUtil {
 	private static BlockState readBlockState(CompoundTag nbt) {
 		String name = nbt.getString("Name").get();
 
-		if (!(ResourceLocation.tryParse(name) instanceof ResourceLocation id)) return Blocks.AIR.defaultBlockState();
+		if (!(Identifier.tryParse(name) instanceof Identifier id)) return Blocks.AIR.defaultBlockState();
 
 		BlockState state = BuiltInRegistries.BLOCK.getOptional(id).orElse(Blocks.AIR).defaultBlockState();
 
